@@ -1,0 +1,23 @@
+# Local-development compose. For production prefer building the image
+# in CI and supplying secrets via your orchestrator (k8s, ECS, etc.).
+services:
+  web:
+    build: .
+    image: vision-access-control:local
+    ports:
+      - "5000:5000"
+    environment:
+      # Required. Generate once: python -c "import secrets; print(secrets.token_hex(32))"
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in the environment or .env}
+      # DB is bind-mounted under ./data so it survives container restarts.
+      DATABASE_URL: sqlite:////app/access_control/app.db
+      UPLOAD_FOLDER: /app/access_control/uploads
+      # HTTPS terminates outside this container; cookies stay non-Secure in dev.
+      SESSION_COOKIE_SECURE: "0"
+    volumes:
+      - ./data/db:/app/access_control
+      - ./data/uploads:/app/access_control/uploads
+    # Camera access from the container is platform-specific; uncomment for Linux:
+    # devices:
+    #   - /dev/video0:/dev/video0
+    restart: unless-stopped
