@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Alerts</h5>
+    <table id="alerts-table" class="display">
+      <thead><tr><th>Time</th><th>Zone</th><th>Type</th><th>Description</th><th>Resolved</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr>
+          <td>{{ a.timestamp }}</td>
+          <td>{{ a.zone }}</td>
+          <td>{{ a.alert_type }}</td>
+          <td>{{ a.description }}</td>
+          <td>{{ 'Yes' if a.resolved else 'No' }}</td>
+          <td>
+            {% if not a.resolved %}
+              <form method="post" action="/alerts/resolve/{{ a.id }}"><button class="btn btn-sm btn-success">Mark Resolved</button></form>
+            {% endif %}
+            <form method="post" action="/alerts/delete/{{ a.id }}" style="display:inline-block">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>$('#alerts-table').DataTable();</script>{% endblock %}

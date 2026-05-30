@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Zones</h5>
+    <a class="btn btn-primary mb-3" href="/zones/add">Add Zone</a>
+    <table id="zones-table" class="display">
+      <thead><tr><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for z in zones %}
+        <tr>
+          <td>{{ z.zone_name }}</td>
+          <td>{{ z.description }}</td>
+          <td>
+            <a class="btn btn-sm btn-secondary" href="/zones/edit/{{ z.id }}">Edit</a>
+            <form method="post" action="/zones/delete/{{ z.id }}" style="display:inline-block">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>$('#zones-table').DataTable();</script>{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Personnel</h5>
+    <a class="btn btn-primary mb-3" href="/personnel/add">Add Personnel</a>
+    <table id="personnel-table" class="display">
+      <thead><tr><th>Name</th><th>Role</th><th>Active</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for p in personnel %}
+        <tr>
+          <td>{{ p.full_name }}</td>
+          <td>{{ p.role.role_name if p.role }}</td>
+          <td>{{ 'Yes' if p.active else 'No' }}</td>
+          <td>
+            <a class="btn btn-sm btn-secondary" href="/personnel/edit/{{ p.id }}">Edit</a>
+            <form method="post" action="/personnel/delete/{{ p.id }}" style="display:inline-block">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>$('#personnel-table').DataTable();</script>
+{% endblock %}

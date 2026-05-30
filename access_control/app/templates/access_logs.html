@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Access Logs</h5>
+    <table id="logs-table" class="display">
+      <thead><tr><th>Time</th><th>Name</th><th>Zone</th><th>Status</th><th>Reason</th><th>Action</th><th>Manage</th></tr></thead>
+      <tbody>
+        {% for l in logs %}
+        <tr>
+          <td>{{ l.timestamp }}</td>
+          <td>{{ l.full_name }}</td>
+          <td>{{ l.zone }}</td>
+          <td>{{ l.status }}</td>
+          <td>{{ l.denial_reason }}</td>
+          <td>{{ l.action_taken }}</td>
+          <td>
+            <form method="post" action="/access_logs/delete/{{ l.id }}" style="display:inline-block">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>$('#logs-table').DataTable();</script>{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Roles</h5>
+    <a class="btn btn-primary mb-3" href="/roles/add">Add Role</a>
+    <table id="roles-table" class="display">
+      <thead><tr><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for r in roles %}
+        <tr>
+          <td>{{ r.role_name }}</td>
+          <td>{{ r.description }}</td>
+          <td>
+            <a class="btn btn-sm btn-secondary" href="/roles/edit/{{ r.id }}">Edit</a>
+            <form method="post" action="/roles/delete/{{ r.id }}" style="display:inline-block">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>$('#roles-table').DataTable();</script>{% endblock %}

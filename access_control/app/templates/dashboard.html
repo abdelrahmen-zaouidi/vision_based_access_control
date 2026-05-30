@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Admin Dashboard</h5>
+    <p>Use the left navigation to manage personnel, roles, zones, view logs and alerts.</p>
+    <hr>
+    <h6>Simulation</h6>
+    <div class="row">
+      <div class="col-md-6">
+        <form id="sim-form">
+          <div class="mb-3">
+            <label class="form-label">Zone</label>
+            <input class="form-control" name="zone" id="zone" placeholder="Enter zone" required>
+          </div>
+          <div class="mb-2">
+            <p class="form-text">Recognition sensitivity and timing are automatic and adaptive — no manual timeout, votes or tolerance required.</p>
+          </div>
+          <button class="btn btn-success" id="start-rec" type="button">Start Recognition</button>
+          <button class="btn btn-warning" id="stop-rec" type="button">Stop Recognition</button>
+        </form>
+        <div id="sim-result" class="mt-3 sim-result"></div>
+      </div>
+      <div class="col-md-6">
+        <h6>Camera Preview</h6>
+        <img id="cam-preview" src="/camera/stream" class="cam-preview-img" title="Camera stream preview" />
+        <div id="rec-status" class="mt-2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$('#sim-form').on('submit', function(e){
+  e.preventDefault();
+  // handled by Start Recognition button
+});
+
+$('#start-rec').on('click', function(e){
+  e.preventDefault();
+  var zone = $('#zone').val();
+  $.post('/recognize/start', {zone: zone}, function(resp){
+    $('#rec-status').text('Recognition started...');
+    pollStatus();
+  });
+});
+
+$('#stop-rec').on('click', function(e){
+  e.preventDefault();
+  $.post('/recognize/stop', {}, function(){ $('#rec-status').text('Stopping...'); });
+});
+
+function pollStatus(){
+  var interval = setInterval(function(){
+    $.get('/recognize/status', function(s){
+      if(s.status === 'running'){
+        $('#rec-status').text('Recognition running...');
+      } else if(s.status === 'finished'){
+        clearInterval(interval);
+        var r = s.result;
+        if(r.status === 'success'){
+          $('#sim-result').css({'background':'#d4edda', 'color':'#155724', 'display':'block'}).text('ACCESS GRANTED - ' + r.person);
+        } else {
+          $('#sim-result').css({'background':'#f8d7da', 'color':'#721c24', 'display':'block'}).text('ACCESS DENIED - ' + (r.reason||'Unknown'));
+        }
+        $('#rec-status').text('Finished');
+        setTimeout(function(){ $('#sim-result').fadeOut(); }, 5000);
+      } else {
+        $('#rec-status').text('Idle');
+      }
+    });
+  }, 1000);
+}
+</script>
+{% endblock %}
