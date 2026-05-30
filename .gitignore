@@ -1,0 +1,47 @@
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# Application data (NEVER commit — contains PII, biometric data, password hashes)
+*.db
+*.sqlite
+*.sqlite3
+access_control/app.db
+access_control/uploads/
+uploads/
+
+# Logs (may contain PII)
+*.log
+access_control/face_recog.log
+access_control/face_engine.log
+logs/
+
+# Diagnostic / analysis outputs
+encodings_report.json
+**/encodings_report.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+.eggs/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
