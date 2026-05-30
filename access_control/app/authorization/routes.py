@@ -10,7 +10,6 @@ import numpy as np
 import cv2
 from threading import Thread, Event
 from flask import current_app
-import os
 
 
 @authz_bp.route('/dashboard')
@@ -36,7 +35,7 @@ def add_personnel():
         file = request.files.get('face_image')
         filename = file.filename
         try:
-            person = enroll_person_image(file.stream, filename, name, role_id)
+            enroll_person_image(file.stream, filename, name, role_id)
             flash('Personnel added', 'success')
             return redirect(url_for('authorization.personnel_list'))
         except Exception as e:
@@ -183,8 +182,8 @@ def access_logs():
 @authz_bp.route('/access_logs/delete/<int:log_id>', methods=['POST'])
 @login_required
 def delete_access_log(log_id):
-    l = AccessLog.query.get_or_404(log_id)
-    db.session.delete(l)
+    log_entry = AccessLog.query.get_or_404(log_id)
+    db.session.delete(log_entry)
     db.session.commit()
     flash('Log deleted', 'success')
     return redirect(url_for('authorization.access_logs'))
