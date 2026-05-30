@@ -7,10 +7,9 @@ import numpy as np
 from datetime import datetime, timedelta
 from app.models.models import AccessLog, Alert, Role, Zone
 import time
-from collections import Counter, deque
+from collections import Counter
 import logging
 import os
-import math
 from pathlib import Path
 from werkzeug.utils import secure_filename
 
@@ -18,16 +17,16 @@ from werkzeug.utils import secure_filename
 def _normalize_locations(locs):
     """Convert various dlib/face_recognition location types to (top,right,bottom,left) tuples."""
     out = []
-    for l in locs:
+    for loc in locs:
         # full_object_detection (has rect)
-        if hasattr(l, 'rect'):
-            r = l.rect
+        if hasattr(loc, 'rect'):
+            r = loc.rect
             out.append((r.top(), r.right(), r.bottom(), r.left()))
         # dlib.rectangle
-        elif hasattr(l, 'top') and hasattr(l, 'right'):
-            out.append((l.top(), l.right(), l.bottom(), l.left()))
+        elif hasattr(loc, 'top') and hasattr(loc, 'right'):
+            out.append((loc.top(), loc.right(), loc.bottom(), loc.left()))
         else:
-            out.append(tuple(l))
+            out.append(tuple(loc))
     return out
 
 
@@ -232,7 +231,6 @@ def _run_recognition_core(get_frame_callable, zone_name, timeout_seconds=DEFAULT
     counts = Counter()
     # allow fractional counts for soft decay
     float_counts = { }
-    last_seen = {}
     detection_state = 'searching'
     adaptive_timeout = timeout_seconds
 
@@ -326,19 +324,22 @@ def _run_recognition_core(get_frame_callable, zone_name, timeout_seconds=DEFAULT
                 sx = float(w) / float(small_rgb.shape[1])
                 sy = float(h) / float(small_rgb.shape[0])
                 scaled_locs = []
-                for (t, r, b, l) in small_locs:
-                    scaled_locs.append((int(t * sy), int(r * sx), int(b * sy), int(l * sx)))
+                for (t, r, b, lt) in small_locs:
+                    scaled_locs.append((int(t * sy), int(r * sx), int(b * sy), int(lt * sx)))
                 # select largest face only
-                areas = [ (b - t) * (r - l) for (t, r, b, l) in scaled_locs ]
+                areas = [ (b - t) * (r - lt) for (t, r, b, lt) in scaled_locs ]
                 max_idx = int(np.argmax(areas)) if areas else None
                 if max_idx is not None:
                     loc = scaled_locs[max_idx]
                     face_locations = [loc]
                     # crop from proc (BGR) and compute encoding on a small resized crop
-                    t, r, b, l = loc
+                    t, r, b, lt = loc
                     # ensure coords inside image
-                    t = max(0, t); l = max(0, l); b = min(proc.shape[0], b); r = min(proc.shape[1], r)
-                    crop = proc[t:b, l:r]
+                    t = max(0, t)
+                    lt = max(0, lt)
+                    b = min(proc.shape[0], b)
+                    r = min(proc.shape[1], r)
+                    crop = proc[t:b, lt:r]
                     try:
                         crop_rgb = crop[:, :, ::-1]
                         crop_rgb = np.ascontiguousarray(crop_rgb)
@@ -402,8 +403,8 @@ def _run_recognition_core(get_frame_callable, zone_name, timeout_seconds=DEFAULT
             try:
                 disp = proc.copy()
                 if face_locations:
-                    t, r, b, l = face_locations[0]
-                    cv2.rectangle(disp, (l, t), (r, b), (0, 255, 0), 2)
+                    t, r, b, lt = face_locations[0]
+                    cv2.rectangle(disp, (lt, t), (r, b), (0, 255, 0), 2)
 
                 if top_pid:
                     if top_pid == 'unknown':

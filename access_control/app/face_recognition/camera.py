@@ -2,9 +2,7 @@ import cv2
 import sys
 from threading import Thread, Event, Lock
 import time
-import io
 import logging
-from flask import Response
 
 
 class CameraManager:
