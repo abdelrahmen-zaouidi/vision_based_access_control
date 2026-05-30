@@ -2,10 +2,11 @@ from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required
 from app.auth import auth_bp
 from app.models.models import Admin
-from app import db
+from app import db, limiter
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit('5 per minute; 20 per hour', methods=['POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
