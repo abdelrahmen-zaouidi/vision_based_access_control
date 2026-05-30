@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Access Control Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
@@ -45,6 +46,20 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+      // Attach the CSRF token to every non-GET jQuery AJAX request so that
+      // Flask-WTF accepts JSON / form posts without an in-form hidden field.
+      (function(){
+        var token = $('meta[name="csrf-token"]').attr('content');
+        $.ajaxSetup({
+          beforeSend: function(xhr, settings){
+            if(!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)){
+              xhr.setRequestHeader('X-CSRFToken', token);
+            }
+          }
+        });
+      })();
+    </script>
     {% block scripts %}{% endblock %}
   </body>
   </html>

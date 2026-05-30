@@ -14,6 +14,7 @@
           <td>
             <a class="btn btn-sm btn-secondary" href="/zones/edit/{{ z.id }}">Edit</a>
             <form method="post" action="/zones/delete/{{ z.id }}" style="display:inline-block">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn btn-sm btn-danger">Delete</button>
             </form>
           </td>
