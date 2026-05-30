@@ -1,8 +1,15 @@
 from app import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime
-import pickle
+import numpy as np
 from werkzeug.security import generate_password_hash, check_password_hash
+
+# face_recognition produces 128-d float64 encodings. Persisting them via
+# numpy.tobytes/frombuffer keeps the column opaque-binary (no schema change)
+# while removing the pickle.loads RCE risk: a tampered row can at worst
+# yield bad floats, never execute code.
+_FACE_ENCODING_DTYPE = np.float64
+_FACE_ENCODING_SHAPE = (128,)
 
 
 role_zone = db.Table('role_zone_access',
@@ -55,12 +62,20 @@ class Personnel(db.Model):
     active = db.Column(db.Boolean, default=True)
 
     def set_encoding(self, encoding_array):
-        self.face_encoding = pickle.dumps(encoding_array)
+        arr = np.asarray(encoding_array, dtype=_FACE_ENCODING_DTYPE)
+        if arr.shape != _FACE_ENCODING_SHAPE:
+            raise ValueError(
+                f'Expected face encoding of shape {_FACE_ENCODING_SHAPE}, '
+                f'got {arr.shape}'
+            )
+        self.face_encoding = arr.tobytes()
 
     def get_encoding(self):
         if not self.face_encoding:
             return None
-        return pickle.loads(self.face_encoding)
+        return np.frombuffer(
+            self.face_encoding, dtype=_FACE_ENCODING_DTYPE
+        ).reshape(_FACE_ENCODING_SHAPE)
 
 
 class AccessLog(db.Model):
