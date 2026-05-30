@@ -11,6 +11,8 @@ from collections import Counter, deque
 import logging
 import os
 import math
+from pathlib import Path
+from werkzeug.utils import secure_filename
 
 
 def _normalize_locations(locs):
@@ -120,12 +122,17 @@ def _log_counts(logger, counts):
 
 
 def enroll_person_image(file_stream, filename, full_name, role_id):
-    # Save file
-    save_path = f"{UPLOAD_FOLDER}\\{filename}"
+    # werkzeug.secure_filename strips path separators and unsafe characters,
+    # blocking '../etc/passwd' style traversal and Windows reserved names.
+    safe_name = secure_filename(filename or '')
+    if not safe_name:
+        raise ValueError('Invalid filename')
+
+    save_path = Path(UPLOAD_FOLDER) / safe_name
     with open(save_path, 'wb') as f:
         f.write(file_stream.read())
 
-    image = face_recognition.load_image_file(save_path)
+    image = face_recognition.load_image_file(str(save_path))
     encodings = face_recognition.face_encodings(image)
     if len(encodings) != 1:
         raise ValueError('Image must contain exactly one clear face')
