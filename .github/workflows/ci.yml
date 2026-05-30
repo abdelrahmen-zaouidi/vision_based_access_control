@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
+        run: pip install ruff==0.6.9
+      - name: Lint
+        run: ruff check access_control
+
+  smoke-import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install system deps for dlib / opencv
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake \
+            libgl1 libglib2.0-0 \
+            libboost-all-dev
+      - name: Install Python deps
+        working-directory: access_control
+        run: pip install -r requirements.txt
+      - name: Smoke test (create_app boots)
+        working-directory: access_control
+        env:
+          SECRET_KEY: ci-smoke-test-key-not-secret
+          SESSION_COOKIE_SECURE: "0"
+        run: python -c "from app import create_app; app = create_app(); print('OK:', app)"
