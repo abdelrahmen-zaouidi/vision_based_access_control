@@ -12,6 +12,13 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    if not app.config.get('SECRET_KEY'):
+        raise RuntimeError(
+            "SECRET_KEY is not set. Generate one with "
+            "`python -c \"import secrets; print(secrets.token_hex(32))\"` "
+            "and set it in the SECRET_KEY environment variable (see .env.example)."
+        )
+
     db.init_app(app)
     login_manager.init_app(app)
 
