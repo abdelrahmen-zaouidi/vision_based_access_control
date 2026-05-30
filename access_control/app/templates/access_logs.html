@@ -16,6 +16,7 @@
           <td>{{ l.action_taken }}</td>
           <td>
             <form method="post" action="/access_logs/delete/{{ l.id }}" style="display:inline-block">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn btn-sm btn-danger">Delete</button>
             </form>
           </td>

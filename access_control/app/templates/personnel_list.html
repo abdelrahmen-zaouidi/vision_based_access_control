@@ -15,6 +15,7 @@
           <td>
             <a class="btn btn-sm btn-secondary" href="/personnel/edit/{{ p.id }}">Edit</a>
             <form method="post" action="/personnel/delete/{{ p.id }}" style="display:inline-block">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn btn-sm btn-danger">Delete</button>
             </form>
           </td>

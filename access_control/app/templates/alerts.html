@@ -15,9 +15,13 @@
           <td>{{ 'Yes' if a.resolved else 'No' }}</td>
           <td>
             {% if not a.resolved %}
-              <form method="post" action="/alerts/resolve/{{ a.id }}"><button class="btn btn-sm btn-success">Mark Resolved</button></form>
+              <form method="post" action="/alerts/resolve/{{ a.id }}" style="display:inline-block">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-success">Mark Resolved</button>
+              </form>
             {% endif %}
             <form method="post" action="/alerts/delete/{{ a.id }}" style="display:inline-block">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn btn-sm btn-danger">Delete</button>
             </form>
           </td>
